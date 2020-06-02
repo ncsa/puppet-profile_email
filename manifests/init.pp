@@ -34,7 +34,7 @@ class profile_email (
   ensure_packages( $required_pkgs )
 
   # Helpful variables
-  $file_header = @ENDHERE
+  $file_header = @(ENDHERE)
     # This file is managed by Puppet.
     # Manual changes will be lost.
     | ENDHERE

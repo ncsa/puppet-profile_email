@@ -1,13 +1,15 @@
 # module name
- 
-One line summary
- 
+
+Enable email.
+
+The default root email address is devnull@ncsa.illinois.edu. devnull@ncsa.illinois.edu is an actual mail alias setup on NCSA’s pop server that just drops the message. This will have to be changed via hiera data in order to have root mail sent to the appropriate place.
+
+
 ## Dependencies
-- [author/module_one](https://forge.puppet.com/author/module_one)
-- [other/module_two](https://forge.puppet.com/other/module_two)
- 
+
+[![pdk-validate](https://github.com/ncsa/puppet-profile_additional_yumrepos/actions/workflows/pdk-validate.yml/badge.svg)](https://github.com/ncsa/puppet-profile_additional_yumrepos/actions/workflows/pdk-validate.yml)
+ [![yamllint](https://github.com/ncsa/puppet-profile_additional_yumrepos/actions/workflows/yamllint.yml/badge.svg)](https://github.com/ncsa/puppet-profile_additional_yumrepos/actions/workflows/yamllint.yml)
+
 ## Reference
- 
-(output from "List all class parameters" ... below)
- 
+
 [REFERENCE.md](REFERENCE.md)

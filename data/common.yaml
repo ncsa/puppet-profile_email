@@ -2,5 +2,5 @@
 profile_email::canonical_aliases: ~
 profile_email::mydomain: "ncsa.illinois.edu"
 profile_email::relayhost: "smtp.ncsa.illinois.edu"
-profile_email::root_mail_target: ~
+profile_email::root_mail_target: "devnull@ncsa.illinois.edu"
 profile_email::virtual_aliases: ~

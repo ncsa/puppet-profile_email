@@ -1,13 +1,12 @@
 # module name
  
-One line summary
+Enable email.
  
 ## Dependencies
-- [author/module_one](https://forge.puppet.com/author/module_one)
-- [other/module_two](https://forge.puppet.com/other/module_two)
- 
+
+[![pdk-validate](https://github.com/ncsa/puppet-profile_additional_yumrepos/actions/workflows/pdk-validate.yml/badge.svg)](https://github.com/ncsa/puppet-profile_additional_yumrepos/actions/workflows/pdk-validate.yml)
+ [![yamllint](https://github.com/ncsa/puppet-profile_additional_yumrepos/actions/workflows/yamllint.yml/badge.svg)](https://github.com/ncsa/puppet-profile_additional_yumrepos/actions/workflows/yamllint.yml) 
+
 ## Reference
- 
-(output from "List all class parameters" ... below)
- 
+
 [REFERENCE.md](REFERENCE.md)

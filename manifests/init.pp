@@ -93,43 +93,89 @@ class profile_email (
 
   ## Add additional lines to the file that will customize it for our enterprise.
   file_line { 'postfix_myhostname':
-    path   => '/etc/postfix/main.cf',
-    line   => "myhostname = ${::fqdn}",
-    notify => Service[ 'postfix' ],
+    path    => '/etc/postfix/main.cf',
+    replace => true,
+    match   => '^myhostname\ =',
+    line    => "myhostname = ${::fqdn}",
+    notify  => Service[ 'postfix' ],
   }
 
   file_line { 'postfix_mydomain':
-    path   => '/etc/postfix/main.cf',
-    line   => "mydomain = ${mydomain}",
-    notify => Service[ 'postfix' ],
-  }
-
-  [ 'myorigin= $mydomain', 'mydestination =' ].each |$line| {
-    file_line { "postfix_${line}":
-      path   => '/etc/postfix/main.cf',
-      line   => $line,
-      notify => Service[ 'postfix' ],
-    }
+    path    => '/etc/postfix/main.cf',
+    replace => true,
+    match   => '^mydomain\ =',
+    line    => "mydomain = ${mydomain}",
+    notify  => Service[ 'postfix' ],
   }
 
   file_line { 'postfix_relayhost':
-    path   => '/etc/postfix/main.cf',
-    line   => "relayhost = ${relayhost}",
-    notify => Service[ 'postfix' ],
+    path    => '/etc/postfix/main.cf',
+    replace => true,
+    match   => '^relayhost\ =',
+    line    => "relayhost = ${relayhost}",
+    notify  => Service[ 'postfix' ],
   }
 
-  $cf_lines = [
-    'masquerade_exceptions = root',
-    'masquerade_classes = envelope_sender, header_sender, header_recipient',
-    'virtual_alias_maps = hash:/etc/postfix/virtual',
-    'canonical_maps = hash:/etc/postfix/canonical'
-  ]
-    $cf_lines.each |$line| {
-    file_line { "postfix_${line}":
-      path   => '/etc/postfix/main.cf',
-      line   => $line,
-      notify => Service[ 'postfix' ],
-    }
+  file_line { 'postfix_masquerade_exceptions':
+    path    => '/etc/postfix/main.cf',
+    replace => true,
+    match   => '^masquerade_exceptions\ =',
+    line    => 'masquerade_exceptions = root',
+    notify  => Service[ 'postfix' ],
+  }
+
+  file_line { 'postfix_masquerade_classes':
+    path    => '/etc/postfix/main.cf',
+    replace => true,
+    match   => '^masquerade_classes\ =',
+    line    => 'masquerade_classes = envelope_sender, header_sender, header_recipient',
+    notify  => Service[ 'postfix' ],
+  }
+
+  file_line { 'postfix_virtual_alias_maps':
+    path    => '/etc/postfix/main.cf',
+    replace => true,
+    match   => '^virtual_alias_maps\ =',
+    line    => 'virtual_alias_maps = hash:/etc/postfix/virtual',
+    notify  => Service[ 'postfix' ],
+  }
+
+  file_line { 'postfix_canonical_maps':
+    path    => '/etc/postfix/main.cf',
+    replace => true,
+    match   => '^canonical_maps\ =',
+    line    => 'canonical_maps = hash:/etc/postfix/canonical',
+    notify  => Service[ 'postfix' ],
+  }
+
+  #Because mydestination is empty (see the previous example), only address literals matching $inet_interfaces or $proxy_interfaces are 
+  #deemed local. So "localpart@[a.d.d.r]" can be matched as simply "localpart" in canonical(5) and virtual(5). This avoids the need to 
+  #specify firewall IP addresses into Postfix configuration files.
+
+
+  file_line { 'postfix_remove_os_mydestination':
+    ensure            => absent,
+    path              => '/etc/postfix/main.cf',
+    match             => '^mydestination \= \$myhostname',
+    match_for_absence => true,
+  }
+
+  file_line { 'postfix_mydestination':
+    path    => '/etc/postfix/main.cf',
+    replace => true,
+    match   => '^mydestination \=',
+    line    => 'mydestination =',
+    notify  => Service[ 'postfix' ],
+  }
+
+
+  file_line { 'postfix_myorigin':
+    path     => '/etc/postfix/main.cf',
+    replace  => true,
+    multiple => false,
+    match    => '^myorigin\ =',
+    line     => "myorigin =  ${::fqdn}",
+    notify   => Service[ 'postfix' ],
   }
 
 

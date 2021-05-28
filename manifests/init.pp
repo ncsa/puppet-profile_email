@@ -169,6 +169,14 @@ class profile_email (
   }
 
 
+  file_line { 'postfix_remove_os_myorigin':
+    ensure            => absent,
+    path              => '/etc/postfix/main.cf',
+    match             => 'myorigin=',
+    match_for_absence => true,
+  }
+
+
   file_line { 'postfix_myorigin':
     path     => '/etc/postfix/main.cf',
     replace  => true,

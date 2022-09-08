@@ -30,6 +30,7 @@ The following parameters are available in the `profile_email` class:
 * [`virtual_aliases`](#virtual_aliases)
 * [`canonical_aliases`](#canonical_aliases)
 * [`mydomain`](#mydomain)
+* [`myorigin`](#myorigin)
 * [`relayhost`](#relayhost)
 * [`required_pkgs`](#required_pkgs)
 
@@ -58,6 +59,12 @@ Text content for the file /etc/postfix/canonical.
 Data type: `String[1]`
 
 Email domain this host is a part of. Usually just the FQDN without hostname.
+
+##### <a name="myorigin"></a>`myorigin`
+
+Data type: `String[1]`
+
+Email domain that locally-posted mail appears to come from.
 
 ##### <a name="relayhost"></a>`relayhost`
 

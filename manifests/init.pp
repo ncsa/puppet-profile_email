@@ -16,6 +16,9 @@
 # @param mydomain
 #   Email domain this host is a part of. Usually just the FQDN without hostname.
 #
+# @param myorigin
+#   Email domain that locally-posted mail appears to come from.
+#
 # @param relayhost
 #   SMTP server to which all remote messages should be sent.
 #
@@ -24,6 +27,7 @@
 class profile_email (
   Optional[ String ] $canonical_aliases,
   String[1]          $mydomain,
+  String[1]          $myorigin,
   String[1]          $relayhost,
   Array[ String[1] ] $required_pkgs,
   Optional[ String ] $root_mail_target,
@@ -182,7 +186,7 @@ class profile_email (
     replace  => true,
     multiple => false,
     match    => '^myorigin\ =',
-    line     => "myorigin =  ${::fqdn}",
+    line     => "myorigin = ${myorigin}",
     notify   => Service[ 'postfix' ],
   }
 

@@ -29,8 +29,10 @@ The following parameters are available in the `profile_email` class:
 * [`root_mail_target`](#root_mail_target)
 * [`virtual_aliases`](#virtual_aliases)
 * [`canonical_aliases`](#canonical_aliases)
+* [`inet_interfaces`](#inet_interfaces)
 * [`mydomain`](#mydomain)
 * [`myorigin`](#myorigin)
+* [`mynetworks`](#mynetworks)
 * [`relayhost`](#relayhost)
 * [`required_pkgs`](#required_pkgs)
 
@@ -54,6 +56,12 @@ Data type: `Optional[ String ]`
 
 Text content for the file /etc/postfix/canonical.
 
+##### <a name="inet_interfaces"></a>`inet_interfaces`
+
+Data type: `Array[String[1]]`
+
+List of additional network interface addresses that this mail system receives mail on.
+
 ##### <a name="mydomain"></a>`mydomain`
 
 Data type: `String[1]`
@@ -65,6 +73,12 @@ Email domain this host is a part of. Usually just the FQDN without hostname.
 Data type: `String[1]`
 
 Email domain that locally-posted mail appears to come from.
+
+##### <a name="mynetworks"></a>`mynetworks`
+
+Data type: `Array[String[1]]`
+
+List of IPs and/or subnet CIDRs of trusted network SMTP clients.
 
 ##### <a name="relayhost"></a>`relayhost`
 

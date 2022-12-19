@@ -13,11 +13,17 @@
 # @param canonical_aliases
 #   Text content for the file /etc/postfix/canonical.
 #
+# @param inet_interfaces
+#   List of additional network interface addresses that this mail system receives mail on.
+#
 # @param mydomain
 #   Email domain this host is a part of. Usually just the FQDN without hostname.
 #
 # @param myorigin
 #   Email domain that locally-posted mail appears to come from.
+#
+# @param mynetworks
+#   List of IPs and/or subnet CIDRs of trusted network SMTP clients.
 #
 # @param relayhost
 #   SMTP server to which all remote messages should be sent.
@@ -26,8 +32,10 @@
 #   include profile_email
 class profile_email (
   Optional[ String ] $canonical_aliases,
+  Array[String[1]]   $inet_interfaces,
   String[1]          $mydomain,
   String[1]          $myorigin,
+  Array[String[1]]   $mynetworks,
   String[1]          $relayhost,
   Array[ String[1] ] $required_pkgs,
   Optional[ String ] $root_mail_target,
@@ -79,21 +87,21 @@ class profile_email (
   exec { 'newaliases':
     command     => '/usr/bin/newaliases',
     refreshonly => true,
-    require     => File_line[ 'postfix_main.cf_inet_interfaces_ipv4_only' ],
+    require     => File_line[ 'postfix_main.cf_inet_interfaces' ],
   }
 
 
   # Adjust the Postfix configuration.
 
-  ## Make sure that Postfix only expects IPv4.
-  file_line { 'postfix_main.cf_inet_interfaces_ipv4_only':
+  ## Make sure that Postfix only expects IPv4 - specify 127.0.01
+  $all_interfaces =  join(concat(['127.0.0.1'], $inet_interfaces.unique.sort), ', ')
+  file_line { 'postfix_main.cf_inet_interfaces':
     path    => '/etc/postfix/main.cf',
     replace => true,
-    line    => 'inet_interfaces = 127.0.0.1',
-    match   => 'inet_interfaces = localhost',
+    line    => "inet_interfaces = ${all_interfaces}",
+    match   => '^inet_interfaces\ =.*',
     require => Package[ 'postfix' ],
   }
-
 
   ## Add additional lines to the file that will customize it for our enterprise.
   file_line { 'postfix_myhostname':
@@ -180,7 +188,6 @@ class profile_email (
     match_for_absence => true,
   }
 
-
   file_line { 'postfix_myorigin':
     path     => '/etc/postfix/main.cf',
     replace  => true,
@@ -188,6 +195,38 @@ class profile_email (
     match    => '^myorigin\ =',
     line     => "myorigin = ${myorigin}",
     notify   => Service[ 'postfix' ],
+  }
+
+  if ( ! empty($mynetworks) ) {
+    $unique_mynetworks = $mynetworks.unique.sort.join(', ')
+    file_line { 'postfix_mynetworks':
+      path     => '/etc/postfix/main.cf',
+      replace  => true,
+      multiple => false,
+      match    => '^mynetworks\ = .*',
+      line     => "mynetworks = ${unique_mynetworks}",
+      notify   => Service[ 'postfix' ],
+    }
+
+    # firewall rules
+    each( $mynetworks ) |$ip_src| {
+      firewall { "300 allow postfix smtp relay from ${ip_src}":
+        action => accept,
+        dport  => '25',
+        proto  => tcp,
+        source => $ip_src,
+      }
+    }
+  }
+  else
+  {
+    file_line { 'postfix_mynetworks':
+      ensure            => absent,
+      path              => '/etc/postfix/main.cf',
+      match             => '^mynetworks\ = .*',
+      match_for_absence => true,
+      notify            => Service[ 'postfix' ],
+    }
   }
 
 

@@ -26,29 +26,16 @@ include profile_email
 
 The following parameters are available in the `profile_email` class:
 
-* [`root_mail_target`](#root_mail_target)
-* [`virtual_aliases`](#virtual_aliases)
 * [`canonical_aliases`](#canonical_aliases)
 * [`inet_interfaces`](#inet_interfaces)
 * [`mydomain`](#mydomain)
 * [`myorigin`](#myorigin)
 * [`mynetworks`](#mynetworks)
 * [`relayhost`](#relayhost)
+* [`root_mail_target`](#root_mail_target)
+* [`smtpd_tls_security_level`](#smtpd_tls_security_level)
+* [`virtual_aliases`](#virtual_aliases)
 * [`required_pkgs`](#required_pkgs)
-
-##### <a name="root_mail_target"></a>`root_mail_target`
-
-Data type: `Optional[ String ]`
-
-To where should root mail be sent.
-Mutually exclusive with virtual_aliases.
-
-##### <a name="virtual_aliases"></a>`virtual_aliases`
-
-Data type: `Optional[ String ]`
-
-Text content for the file /etc/postfix/virtual.
-Mutually exclusive with root_mail_target.
 
 ##### <a name="canonical_aliases"></a>`canonical_aliases`
 
@@ -85,6 +72,27 @@ List of IPs and/or subnet CIDRs of trusted network SMTP clients.
 Data type: `String[1]`
 
 SMTP server to which all remote messages should be sent.
+
+##### <a name="root_mail_target"></a>`root_mail_target`
+
+Data type: `Optional[ String ]`
+
+To where should root mail be sent.
+Mutually exclusive with virtual_aliases.
+
+##### <a name="smtpd_tls_security_level"></a>`smtpd_tls_security_level`
+
+Data type: `String[1]`
+
+SMTP TLS security level for the Postfix SMTP server.
+See https://www.postfix.org/postconf.5.html#smtpd_tls_security_level
+
+##### <a name="virtual_aliases"></a>`virtual_aliases`
+
+Data type: `Optional[ String ]`
+
+Text content for the file /etc/postfix/virtual.
+Mutually exclusive with root_mail_target.
 
 ##### <a name="required_pkgs"></a>`required_pkgs`
 

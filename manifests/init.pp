@@ -2,14 +2,6 @@
 #
 # Basic email and SMTP setup
 #
-# @param root_mail_target
-#   To where should root mail be sent.
-#   Mutually exclusive with virtual_aliases.
-#
-# @param virtual_aliases
-#   Text content for the file /etc/postfix/virtual.
-#   Mutually exclusive with root_mail_target.
-#
 # @param canonical_aliases
 #   Text content for the file /etc/postfix/canonical.
 #
@@ -28,6 +20,18 @@
 # @param relayhost
 #   SMTP server to which all remote messages should be sent.
 #
+# @param root_mail_target
+#   To where should root mail be sent.
+#   Mutually exclusive with virtual_aliases.
+#
+# @param smtpd_tls_security_level
+#   SMTP TLS security level for the Postfix SMTP server.
+#   See https://www.postfix.org/postconf.5.html#smtpd_tls_security_level
+#
+# @param virtual_aliases
+#   Text content for the file /etc/postfix/virtual.
+#   Mutually exclusive with root_mail_target.
+#
 # @example
 #   include profile_email
 class profile_email (
@@ -39,6 +43,7 @@ class profile_email (
   String[1]          $relayhost,
   Array[ String[1] ] $required_pkgs,
   Optional[ String ] $root_mail_target,
+  String[1]          $smtpd_tls_security_level,
   Optional[ String ] $virtual_aliases,
 ) {
 
@@ -141,6 +146,14 @@ class profile_email (
     replace => true,
     match   => '^masquerade_classes\ =',
     line    => 'masquerade_classes = envelope_sender, header_sender, header_recipient',
+    notify  => Service[ 'postfix' ],
+  }
+
+  file_line { 'postfix_smtpd_tls_security_level':
+    path    => '/etc/postfix/main.cf',
+    replace => true,
+    match   => '^smtpd_tls_security_level\ =',
+    line    => "smtpd_tls_security_level = ${smtpd_tls_security_level}",
     notify  => Service[ 'postfix' ],
   }
 

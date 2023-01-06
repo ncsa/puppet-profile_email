@@ -17,6 +17,7 @@ profile_email::inet_interfaces:
   - "172.0.0.2"     # IP OF LOCAL INTERFACE TO LISTEN ON
 profile_email::mynetworks:
   - "172.0.0.0/24"  # SUBNET TO ALLOW RELAYING
+profile_email::smtpd_tls_security_level: "none"
 ```
 
 ## Dependencies

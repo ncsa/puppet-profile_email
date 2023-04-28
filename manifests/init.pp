@@ -11,6 +11,9 @@
 # @param mydomain
 #   Email domain this host is a part of. Usually just the FQDN without hostname.
 #
+# @param myhostname
+#   Email hostname that locally-posted mail appears to come from.
+#
 # @param myorigin
 #   Email domain that locally-posted mail appears to come from.
 #
@@ -39,6 +42,7 @@ class profile_email (
   Array[String[1]]   $inet_interfaces,
   String[1]          $mydomain,
   String[1]          $myorigin,
+  String[1]          $myhostname,
   Array[String[1]]   $mynetworks,
   String[1]          $relayhost,
   Array[ String[1] ] $required_pkgs,
@@ -113,7 +117,7 @@ class profile_email (
     path    => '/etc/postfix/main.cf',
     replace => true,
     match   => '^myhostname\ =',
-    line    => "myhostname = ${::fqdn}",
+    line    => "myhostname = ${myhostname}",
     notify  => Service[ 'postfix' ],
   }
 

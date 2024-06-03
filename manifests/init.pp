@@ -23,6 +23,9 @@
 # @param relayhost
 #   SMTP server to which all remote messages should be sent.
 #
+# @param required_pkgs
+#   List of software packages that should be installed.
+#
 # @param root_mail_target
 #   To where should root mail be sent.
 #   Mutually exclusive with virtual_aliases.
@@ -38,19 +41,18 @@
 # @example
 #   include profile_email
 class profile_email (
-  Optional[ String ] $canonical_aliases,
+  Optional[String] $canonical_aliases,
   Array[String[1]]   $inet_interfaces,
   String[1]          $mydomain,
   String[1]          $myorigin,
   String[1]          $myhostname,
   Array[String[1]]   $mynetworks,
   String[1]          $relayhost,
-  Array[ String[1] ] $required_pkgs,
-  Optional[ String ] $root_mail_target,
+  Array[String[1]] $required_pkgs,
+  Optional[String] $root_mail_target,
   String[1]          $smtpd_tls_security_level,
-  Optional[ String ] $virtual_aliases,
+  Optional[String] $virtual_aliases,
 ) {
-
   # Make sure Postfix is installed.
   ensure_packages( $required_pkgs )
 
@@ -73,15 +75,15 @@ class profile_email (
   }
   # Make virtual file
   file { '/etc/postfix/virtual':
-    content => join( [$file_header, $_virtual_aliases], "\n" ),
-    notify  => Service[ 'postfix' ],
+    content => join([$file_header, $_virtual_aliases], "\n" ),
+    notify  => Service['postfix'],
   }
 
   # Make canonical file
   if $canonical_aliases {
     file { '/etc/postfix/canonical':
-      content => join( [$file_header, $canonical_aliases], "\n" ),
-      notify  => Service[ 'postfix' ],
+      content => join([$file_header, $canonical_aliases], "\n" ),
+      notify  => Service['postfix'],
     }
   }
 
@@ -90,15 +92,14 @@ class profile_email (
     ensure  => absent,
     name    => 'root',
     target  => '/etc/aliases',
-    notify  => Exec[ 'newaliases' ],
-    require => Package[ 'postfix' ],
+    notify  => Exec['newaliases'],
+    require => Package['postfix'],
   }
   exec { 'newaliases':
     command     => '/usr/bin/newaliases',
     refreshonly => true,
-    require     => File_line[ 'postfix_main.cf_inet_interfaces' ],
+    require     => File_line['postfix_main.cf_inet_interfaces'],
   }
-
 
   # Adjust the Postfix configuration.
 
@@ -109,7 +110,7 @@ class profile_email (
     replace => true,
     line    => "inet_interfaces = ${all_interfaces}",
     match   => '^inet_interfaces\ =.*',
-    require => Package[ 'postfix' ],
+    require => Package['postfix'],
   }
 
   ## Add additional lines to the file that will customize it for our enterprise.
@@ -118,7 +119,7 @@ class profile_email (
     replace => true,
     match   => '^myhostname\ =',
     line    => "myhostname = ${myhostname}",
-    notify  => Service[ 'postfix' ],
+    notify  => Service['postfix'],
   }
 
   file_line { 'postfix_mydomain':
@@ -126,7 +127,7 @@ class profile_email (
     replace => true,
     match   => '^mydomain\ =',
     line    => "mydomain = ${mydomain}",
-    notify  => Service[ 'postfix' ],
+    notify  => Service['postfix'],
   }
 
   file_line { 'postfix_relayhost':
@@ -134,7 +135,7 @@ class profile_email (
     replace => true,
     match   => '^relayhost\ =',
     line    => "relayhost = ${relayhost}",
-    notify  => Service[ 'postfix' ],
+    notify  => Service['postfix'],
   }
 
   file_line { 'postfix_masquerade_exceptions':
@@ -142,7 +143,7 @@ class profile_email (
     replace => true,
     match   => '^masquerade_exceptions\ =',
     line    => 'masquerade_exceptions = root',
-    notify  => Service[ 'postfix' ],
+    notify  => Service['postfix'],
   }
 
   file_line { 'postfix_masquerade_classes':
@@ -150,7 +151,7 @@ class profile_email (
     replace => true,
     match   => '^masquerade_classes\ =',
     line    => 'masquerade_classes = envelope_sender, header_sender, header_recipient',
-    notify  => Service[ 'postfix' ],
+    notify  => Service['postfix'],
   }
 
   file_line { 'postfix_smtpd_tls_security_level':
@@ -158,29 +159,54 @@ class profile_email (
     replace => true,
     match   => '^smtpd_tls_security_level\ =',
     line    => "smtpd_tls_security_level = ${smtpd_tls_security_level}",
-    notify  => Service[ 'postfix' ],
+    notify  => Service['postfix'],
   }
 
-  file_line { 'postfix_virtual_alias_maps':
-    path    => '/etc/postfix/main.cf',
-    replace => true,
-    match   => '^virtual_alias_maps\ =',
-    line    => 'virtual_alias_maps = hash:/etc/postfix/virtual',
-    notify  => Service[ 'postfix' ],
-  }
-
-  file_line { 'postfix_canonical_maps':
-    path    => '/etc/postfix/main.cf',
-    replace => true,
-    match   => '^canonical_maps\ =',
-    line    => 'canonical_maps = hash:/etc/postfix/canonical',
-    notify  => Service[ 'postfix' ],
+  # postfix STOPPED SUPPORTING DICTIONARY TYPE hash AND SWAPPED TO lmdb AT SOME POINT
+  # CURRENT Red Hat RELEASES STILL SUPPORT hash
+  #   RHEL9 SUPPORTS lmdb WITH PACKAGE postfix-lmdb BUT postmap WILL STILL DEFAULT TO hash
+  # CURRENT SUSE RELEASES SEEM TO SUPPORT lmdb
+  case $facts['os']['family'] {
+    'RedHat': {
+      file_line { 'postfix_virtual_alias_maps':
+        path    => '/etc/postfix/main.cf',
+        replace => true,
+        match   => '^virtual_alias_maps\ =',
+        line    => 'virtual_alias_maps = hash:/etc/postfix/virtual',
+        notify  => Service['postfix'],
+      }
+      file_line { 'postfix_canonical_maps':
+        path    => '/etc/postfix/main.cf',
+        replace => true,
+        match   => '^canonical_maps\ =',
+        line    => 'canonical_maps = hash:/etc/postfix/canonical',
+        notify  => Service['postfix'],
+      }
+    }
+    'Suse': {
+      file_line { 'postfix_virtual_alias_maps':
+        path    => '/etc/postfix/main.cf',
+        replace => true,
+        match   => '^virtual_alias_maps\ =',
+        line    => 'virtual_alias_maps = lmdb:/etc/postfix/virtual',
+        notify  => Service['postfix'],
+      }
+      file_line { 'postfix_canonical_maps':
+        path    => '/etc/postfix/main.cf',
+        replace => true,
+        match   => '^canonical_maps\ =',
+        line    => 'canonical_maps = lmdb:/etc/postfix/canonical',
+        notify  => Service['postfix'],
+      }
+    }
+    default: {
+      fail('Only RedHat and Suse OS families are supported at this time')
+    }
   }
 
   #Because mydestination is empty (see the previous example), only address literals matching $inet_interfaces or $proxy_interfaces are 
   #deemed local. So "localpart@[a.d.d.r]" can be matched as simply "localpart" in canonical(5) and virtual(5). This avoids the need to 
   #specify firewall IP addresses into Postfix configuration files.
-
 
   file_line { 'postfix_remove_os_mydestination':
     ensure            => absent,
@@ -194,9 +220,8 @@ class profile_email (
     replace => true,
     match   => '^mydestination \=',
     line    => 'mydestination =',
-    notify  => Service[ 'postfix' ],
+    notify  => Service['postfix'],
   }
-
 
   file_line { 'postfix_remove_os_myorigin':
     ensure            => absent,
@@ -211,7 +236,7 @@ class profile_email (
     multiple => false,
     match    => '^myorigin\ =',
     line     => "myorigin = ${myorigin}",
-    notify   => Service[ 'postfix' ],
+    notify   => Service['postfix'],
   }
 
   if ( ! empty($mynetworks) ) {
@@ -222,7 +247,7 @@ class profile_email (
       multiple => false,
       match    => '^mynetworks\ = .*',
       line     => "mynetworks = ${unique_mynetworks}",
-      notify   => Service[ 'postfix' ],
+      notify   => Service['postfix'],
     }
 
     # firewall rules
@@ -235,35 +260,31 @@ class profile_email (
       }
     }
   }
-  else
-  {
+  else {
     file_line { 'postfix_mynetworks':
       ensure            => absent,
       path              => '/etc/postfix/main.cf',
       match             => '^mynetworks\ = .*',
       match_for_absence => true,
-      notify            => Service[ 'postfix' ],
+      notify            => Service['postfix'],
     }
   }
-
 
   # Make sure Postfix is running and that it refreshes when the config is updated.
   service { 'postfix':
     ensure => 'running',
-    notify => Exec[ 'postmap_canonical_aliases', 'postmap_virtual_aliases' ],
+    notify => Exec['postmap_canonical_aliases', 'postmap_virtual_aliases'],
   }
-
 
   # Run postmap commands when Postfix is refreshed.
   exec { 'postmap_canonical_aliases':
     command     => '/usr/sbin/postmap /etc/postfix/canonical',
     refreshonly => true,
-    require     => Package[ 'postfix' ],
+    require     => Package['postfix'],
   }
   exec { 'postmap_virtual_aliases':
     command     => '/usr/sbin/postmap /etc/postfix/virtual',
     refreshonly => true,
-    require     => Package[ 'postfix' ],
+    require     => Package['postfix'],
   }
-
 }

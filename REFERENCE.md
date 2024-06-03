@@ -26,77 +26,84 @@ include profile_email
 
 The following parameters are available in the `profile_email` class:
 
-* [`canonical_aliases`](#canonical_aliases)
-* [`inet_interfaces`](#inet_interfaces)
-* [`mydomain`](#mydomain)
-* [`myorigin`](#myorigin)
-* [`mynetworks`](#mynetworks)
-* [`relayhost`](#relayhost)
-* [`root_mail_target`](#root_mail_target)
-* [`smtpd_tls_security_level`](#smtpd_tls_security_level)
-* [`virtual_aliases`](#virtual_aliases)
-* [`required_pkgs`](#required_pkgs)
+* [`canonical_aliases`](#-profile_email--canonical_aliases)
+* [`inet_interfaces`](#-profile_email--inet_interfaces)
+* [`mydomain`](#-profile_email--mydomain)
+* [`myhostname`](#-profile_email--myhostname)
+* [`myorigin`](#-profile_email--myorigin)
+* [`mynetworks`](#-profile_email--mynetworks)
+* [`relayhost`](#-profile_email--relayhost)
+* [`required_pkgs`](#-profile_email--required_pkgs)
+* [`root_mail_target`](#-profile_email--root_mail_target)
+* [`smtpd_tls_security_level`](#-profile_email--smtpd_tls_security_level)
+* [`virtual_aliases`](#-profile_email--virtual_aliases)
 
-##### <a name="canonical_aliases"></a>`canonical_aliases`
+##### <a name="-profile_email--canonical_aliases"></a>`canonical_aliases`
 
-Data type: `Optional[ String ]`
+Data type: `Optional[String]`
 
 Text content for the file /etc/postfix/canonical.
 
-##### <a name="inet_interfaces"></a>`inet_interfaces`
+##### <a name="-profile_email--inet_interfaces"></a>`inet_interfaces`
 
 Data type: `Array[String[1]]`
 
 List of additional network interface addresses that this mail system receives mail on.
 
-##### <a name="mydomain"></a>`mydomain`
+##### <a name="-profile_email--mydomain"></a>`mydomain`
 
 Data type: `String[1]`
 
 Email domain this host is a part of. Usually just the FQDN without hostname.
 
-##### <a name="myorigin"></a>`myorigin`
+##### <a name="-profile_email--myhostname"></a>`myhostname`
+
+Data type: `String[1]`
+
+Email hostname that locally-posted mail appears to come from.
+
+##### <a name="-profile_email--myorigin"></a>`myorigin`
 
 Data type: `String[1]`
 
 Email domain that locally-posted mail appears to come from.
 
-##### <a name="mynetworks"></a>`mynetworks`
+##### <a name="-profile_email--mynetworks"></a>`mynetworks`
 
 Data type: `Array[String[1]]`
 
 List of IPs and/or subnet CIDRs of trusted network SMTP clients.
 
-##### <a name="relayhost"></a>`relayhost`
+##### <a name="-profile_email--relayhost"></a>`relayhost`
 
 Data type: `String[1]`
 
 SMTP server to which all remote messages should be sent.
 
-##### <a name="root_mail_target"></a>`root_mail_target`
+##### <a name="-profile_email--required_pkgs"></a>`required_pkgs`
 
-Data type: `Optional[ String ]`
+Data type: `Array[String[1]]`
+
+List of software packages that should be installed.
+
+##### <a name="-profile_email--root_mail_target"></a>`root_mail_target`
+
+Data type: `Optional[String]`
 
 To where should root mail be sent.
 Mutually exclusive with virtual_aliases.
 
-##### <a name="smtpd_tls_security_level"></a>`smtpd_tls_security_level`
+##### <a name="-profile_email--smtpd_tls_security_level"></a>`smtpd_tls_security_level`
 
 Data type: `String[1]`
 
 SMTP TLS security level for the Postfix SMTP server.
 See https://www.postfix.org/postconf.5.html#smtpd_tls_security_level
 
-##### <a name="virtual_aliases"></a>`virtual_aliases`
+##### <a name="-profile_email--virtual_aliases"></a>`virtual_aliases`
 
-Data type: `Optional[ String ]`
+Data type: `Optional[String]`
 
 Text content for the file /etc/postfix/virtual.
 Mutually exclusive with root_mail_target.
-
-##### <a name="required_pkgs"></a>`required_pkgs`
-
-Data type: `Array[ String[1] ]`
-
-
 

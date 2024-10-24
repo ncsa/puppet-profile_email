@@ -5,7 +5,7 @@ profile_email::mydomain: "ncsa.illinois.edu"
 profile_email::myorigin: "%{facts.fqdn}"
 profile_email::myhostname: "%{::fqdn}"
 profile_email::mynetworks: []
-profile_email::relayhost: "smtp.ncsa.illinois.edu"
+profile_email::relayhost: "outbound-relays.ncsa.illinois.edu"
 profile_email::root_mail_target: "devnull@ncsa.illinois.edu"
 profile_email::smtpd_tls_security_level: "none"
 profile_email::virtual_aliases: ~
